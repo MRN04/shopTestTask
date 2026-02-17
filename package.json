@@ -1,0 +1,29 @@
+{
+  "name": "inforce-test-task",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo with Next.js frontend and Nest.js backend",
+  "workspaces": [
+    "apps/frontend",
+    "apps/backend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/frontend & npm run dev --workspace=apps/backend",
+    "dev:frontend": "npm run dev --workspace=apps/frontend",
+    "dev:backend": "npm run dev --workspace=apps/backend",
+    "build": "npm run build --workspaces",
+    "build:frontend": "npm run build --workspace=apps/frontend",
+    "build:backend": "npm run build --workspace=apps/backend",
+    "start:frontend": "npm run start --workspace=apps/frontend",
+    "start:backend": "npm run start:prod --workspace=apps/backend"
+  },
+  "keywords": [
+    "monorepo",
+    "nextjs",
+    "nestjs",
+    "react",
+    "redux"
+  ],
+  "author": "",
+  "license": "MIT"
+}
