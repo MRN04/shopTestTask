@@ -100,10 +100,16 @@ export function AddProductModal({
                   <FormLabel>Stock Count</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
+                      type="text"
                       placeholder="0"
                       {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      onChange={(e) => {
+                        if (isNaN(Number(e.target.value))) {
+                          field.onChange(0);
+                        } else {
+                          field.onChange(Number(e.target.value));
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -119,11 +125,16 @@ export function AddProductModal({
                     <FormLabel>Width (cm)</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        step="0.1"
+                        type="text"
                         placeholder="0"
                         {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        onChange={(e) => {
+                          if (isNaN(Number(e.target.value))) {
+                            field.onChange(0);
+                          } else {
+                            field.onChange(Number(e.target.value));
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -138,11 +149,16 @@ export function AddProductModal({
                     <FormLabel>Height (cm)</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        step="0.1"
+                        type="text"
                         placeholder="0"
                         {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        onChange={(e) => {
+                          if (isNaN(Number(e.target.value))) {
+                            field.onChange(0);
+                          } else {
+                            field.onChange(Number(e.target.value));
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

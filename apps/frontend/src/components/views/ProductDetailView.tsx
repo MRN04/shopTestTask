@@ -1,16 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/store";
-import { updateProduct, addComment, deleteComment } from "@/store/productsSlice";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EditProductModal } from "@/components/EditProductModal";
-import { ArrowLeft, Edit, MessageSquare, Trash2, Package, Calendar } from "lucide-react";
+import { ArrowLeft, Edit, MessageSquare, Trash2, Package, Calendar, Loader2 } from "lucide-react";
 import { ProductFormData } from "@/lib/validations/product";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
@@ -24,6 +21,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useGetProductById } from "@/api/services/queries";
+import { useAddComment, useDeleteComment, useUpdateProduct } from "@/api/services/mutations";
 
 interface ProductDetailViewProps {
   productId: string;
@@ -31,11 +30,11 @@ interface ProductDetailViewProps {
 
 export function ProductDetailView({ productId }: ProductDetailViewProps) {
   const router = useRouter();
-  const dispatch = useDispatch();
-
-  const product = useSelector((state: RootState) =>
-    state.products.products.find((p) => p.id === productId)
-  );
+  
+  const { data: product, isLoading, error } = useGetProductById(productId);
+  const updateProductMutation = useUpdateProduct();
+  const addCommentMutation = useAddComment();
+  const deleteCommentMutation = useDeleteComment();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteCommentModalOpen, setIsDeleteCommentModalOpen] = useState(false);
@@ -57,7 +56,65 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
     );
   }, [product]);
 
-  if (!product) {
+  const handleEditProduct = async (data: ProductFormData) => {
+    await updateProductMutation.mutateAsync({
+      id: productId,
+      product: {
+        name: data.name,
+        imageUrl: data.imageUrl,
+        count: data.count,
+        size: { width: data.width, height: data.height },
+        weight: data.weight,
+      },
+    });
+    setIsEditModalOpen(false);
+  };
+
+  const handleAddComment = async (data: CommentFormData) => {
+    await addCommentMutation.mutateAsync({
+      id: productId,
+      comment: {
+        description: data.description,
+      },
+    });
+    reset();
+  };
+
+  const handleDeleteCommentClick = (commentId: string) => {
+    setCommentToDelete(commentId);
+    setIsDeleteCommentModalOpen(true);
+  };
+
+  const handleDeleteCommentConfirm = async () => {
+    if (commentToDelete) {
+      await deleteCommentMutation.mutateAsync({
+        id: productId,
+        commentId: commentToDelete,
+      });
+      setCommentToDelete(null);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error || !product) {
     return (
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -76,54 +133,6 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
       </div>
     );
   }
-
-  const handleEditProduct = (data: ProductFormData) => {
-    dispatch(
-      updateProduct({
-        id: productId,
-        data: {
-          name: data.name,
-          imageUrl: data.imageUrl,
-          count: data.count,
-          size: { width: data.width, height: data.height },
-          weight: data.weight,
-        },
-      })
-    );
-  };
-
-  const handleAddComment = (data: CommentFormData) => {
-    dispatch(
-      addComment({
-        productId,
-        description: data.description,
-      })
-    );
-    reset();
-  };
-
-  const handleDeleteCommentClick = (commentId: string) => {
-    setCommentToDelete(commentId);
-    setIsDeleteCommentModalOpen(true);
-  };
-
-  const handleDeleteCommentConfirm = () => {
-    if (commentToDelete) {
-      dispatch(deleteComment({ productId, commentId: commentToDelete }));
-      setCommentToDelete(null);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -145,7 +154,7 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
                   src={product.imageUrl}
                   alt={product.name}
                   fill
-                  className="object-contain p-8"
+                  className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   priority
                 />
@@ -172,6 +181,7 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
                   size="icon"
                   onClick={() => setIsEditModalOpen(true)}
                   className="shrink-0"
+                  disabled={updateProductMutation.isPending}
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
@@ -232,9 +242,18 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
                 {errors.description.message}
               </p>
             )}
-            <Button type="submit" size="lg">
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Post Comment
+            <Button type="submit" size="lg" disabled={addCommentMutation.isPending}>
+              {addCommentMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  Post Comment
+                </>
+              )}
             </Button>
           </form>
 
@@ -261,6 +280,7 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
                         size="icon"
                         className="h-8 w-8 hover:bg-destructive/10"
                         onClick={() => handleDeleteCommentClick(comment.id)}
+                        disabled={deleteCommentMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -308,8 +328,9 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
                 handleDeleteCommentConfirm();
                 setIsDeleteCommentModalOpen(false);
               }}
+              disabled={deleteCommentMutation.isPending}
             >
-              Delete
+              {deleteCommentMutation.isPending ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

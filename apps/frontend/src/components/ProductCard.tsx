@@ -21,15 +21,15 @@ export function ProductCard({ product, onDelete }: ProductCardProps) {
           src={product.imageUrl}
           alt={product.name}
           fill
-          className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         <div className="absolute top-3 right-3 flex gap-2">
-          <Badge
+          <Badge 
             variant={product.count > 0 ? "default" : "destructive"}
             className="shadow-md"
           >
-            {product.count}
+            {product.count > 0 ? `${product.count} in stock` : "Out of stock"}
           </Badge>
         </div>
       </div>
@@ -50,17 +50,22 @@ export function ProductCard({ product, onDelete }: ProductCardProps) {
               <span>{product.weight}</span>
             </span>
           </div>
-          {product.comments.length > 0 && (
+          {product.comments.length > 0 ? (
             <div className="flex items-center gap-1 text-primary pt-1">
               <MessageSquare className="h-3.5 w-3.5" />
               <span className="text-xs font-medium">
                 {product.comments.length} {product.comments.length === 1 ? "comment" : "comments"}
               </span>
             </div>
+          ) : (
+            <div className="flex items-center gap-1 text-primary pt-1">
+              <MessageSquare className="h-3.5 w-3.5" />
+              <span className="text-xs font-medium">No comments yet</span>
+            </div>
           )}
         </div>
       </CardContent>
-      <CardFooter className="flex gap-2 pt-0">
+      <CardFooter className="flex gap-2 pt-0 ">
         <Link href={`/products/${product.id}`} className="flex-1">
           <Button variant="default" className="w-full shadow-sm hover:shadow-md transition-shadow">
             <Eye className="mr-2 h-4 w-4" />
