@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/app/globals.css";
 import { Providers } from "@/app/providers";
+import { Header } from "@/components/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Inforce Test Task",
-  description: "Next.js app with Redux and Nest.js backend",
+  title: "Product Store | Inforce Test Task",
+  description: "Modern product management app built with Next.js, Redux, and Nest.js",
 };
 
 export default function RootLayout({
@@ -17,11 +18,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body 
+      <body
         className={inter.className}
         suppressHydrationWarning
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-1">{children}</main>
+          </div>
+        </Providers>
       </body>
     </html>
   );
