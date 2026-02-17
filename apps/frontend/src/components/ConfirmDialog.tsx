@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Dialog,
   DialogContent,
@@ -9,37 +7,38 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle } from "lucide-react";
 
-interface DeleteProductModalProps {
+interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
-  productName: string;
+  title: string;
+  description: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  isLoading?: boolean;
 }
 
-export function DeleteProductModal({
+export function ConfirmDialog({
   open,
   onOpenChange,
   onConfirm,
-  productName,
-}: DeleteProductModalProps) {
+  title,
+  description,
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  isLoading = false,
+}: ConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-            <DialogTitle>Delete Product</DialogTitle>
-          </div>
-          <DialogDescription>
-            Are you sure you want to delete <strong>{productName}</strong>? This
-            action cannot be undone.
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {cancelLabel}
           </Button>
           <Button
             variant="destructive"
@@ -47,8 +46,9 @@ export function DeleteProductModal({
               onConfirm();
               onOpenChange(false);
             }}
+            disabled={isLoading}
           >
-            Delete
+            {isLoading ? "Loading..." : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

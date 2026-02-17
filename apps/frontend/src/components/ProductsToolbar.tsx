@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, SlidersHorizontal } from "lucide-react";
 import { SortOption } from "@/types/product";
+import { getProductsCountText } from "@/utils";
 
 interface ProductsToolbarProps {
   sortBy: SortOption;
@@ -17,6 +18,11 @@ interface ProductsToolbarProps {
   onAddProduct: () => void;
   productsCount: number;
 }
+
+const SORT_OPTIONS = [
+  { value: "name" as const, label: "Name (A-Z)" },
+  { value: "count" as const, label: "Stock Count" },
+];
 
 export function ProductsToolbar({
   sortBy,
@@ -31,7 +37,7 @@ export function ProductsToolbar({
           <div className="flex items-center gap-2.5">
             <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
             <span className="text-base font-semibold">
-              {productsCount} {productsCount === 1 ? "Product" : "Products"}
+              {getProductsCountText(productsCount)}
             </span>
           </div>
           <div className="h-5 w-px bg-border hidden sm:block" />
@@ -44,8 +50,11 @@ export function ProductsToolbar({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="name">Name (A-Z)</SelectItem>
-                <SelectItem value="count">Stock Count</SelectItem>
+                {SORT_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

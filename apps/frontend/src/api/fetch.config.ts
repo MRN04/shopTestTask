@@ -1,4 +1,6 @@
-export const baseServer = 'http://localhost:3001';
+import { API_CONFIG } from "@/config";
+
+export const baseServer = API_CONFIG.BASE_URL;
 
 export const fetchClient = (
   path: string,

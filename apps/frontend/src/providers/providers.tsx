@@ -4,13 +4,14 @@ import { Provider } from "react-redux";
 import { store } from "@/store";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { QUERY_CONFIG } from "@/config";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60 * 1000, // 1 minute
-        refetchOnWindowFocus: false,
+        staleTime: QUERY_CONFIG.STALE_TIME,
+        refetchOnWindowFocus: QUERY_CONFIG.REFETCH_ON_WINDOW_FOCUS,
       },
     },
   }));
